@@ -8,8 +8,9 @@
   :dependencies [[org.clojure/clojure "1.12.2"]
                  [org.clojars.caioclavico/kafka-metamorphosis "0.4.0"]
                  [com.taoensso/timbre "5.2.1"]
-                 [cc.qbits/alia "5.1.0"]
+                 [cc.qbits/alia-all "4.3.7-beta1"]
                  [cc.qbits/hayt "4.1.0"]
+                 [cheshire "6.1.0"]
                  [mount "0.1.16"]]
   :main ^:skip-aot backend.core
   :target-path "target/%s"

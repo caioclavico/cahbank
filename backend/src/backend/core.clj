@@ -1,6 +1,7 @@
 (ns backend.core
   (:require [taoensso.timbre :as log]
-            [mount.core :as mount])
+            [mount.core :as mount]
+            [backend.account.infrastructure.messaging.kafka-consumer])
   (:gen-class))
 
 (defn start-backend []

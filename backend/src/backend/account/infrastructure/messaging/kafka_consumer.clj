@@ -1,5 +1,6 @@
 (ns backend.account.infrastructure.messaging.kafka-consumer
   (:require [kafka-metamorphosis.consumer :as kafka]
+            [kafka-metamorphosis.core :as kafka-core]
             [taoensso.timbre :as log]
             [cheshire.core :as json]
             [mount.core :refer [defstate]]))
@@ -17,7 +18,8 @@
   (try
     (let [command (json/parse-string (:value message) true)
           command-type (:type command)]
-      (log/info "Comando recebido - Tipo:" command-type "Offset:" (:offset message)))
+      (log/info "Comando recebido - Tipo:" command-type "Offset:" (:offset message))
+      (clojure.pprint/pprint message))
 
     (catch Exception e
       (println "Error processing command:" (.getMessage e)))))
@@ -27,6 +29,7 @@
   :start
   (let [consumer (kafka/create CONSUMER_CONFIG)]
     (log/info ">>> Iniciando consumer de account-cmds...")
+    (println (kafka-core/health-check))
     (kafka/subscribe! consumer [ACCOUNT_COMMANDS_TOPIC])
     (kafka/consume! consumer {:poll-timeout 1000
                               :handler handle-account-cmd})
@@ -34,4 +37,4 @@
   :stop
   (do
     (println ">>> Parando consumer de account-cmds...")
-    (kafka/stop-consumer kafka-consumer)))
+    (kafka/close! kafka-consumer)))
