@@ -14,6 +14,18 @@
              :active
              (java.time.LocalDateTime/now)))
 
+(defn update-account-data
+  "Atualiza dados da conta (nome e email)"
+  [account name email]
+  (-> account
+      (assoc :name name)
+      (assoc :email email)))
+
+(defn close-account
+  "Fecha uma conta"
+  [account _reason]
+  (assoc account :status :closed))
+
 (defn valid-document?
   "Valida CPF (11 dígitos)"
   [document]
@@ -31,6 +43,14 @@
   "Valida dados para abrir conta"
   [document name email]
   (and (valid-document? document)
+       (valid-email? email)
+       (string? name)
+       (>= (count name) 2)))
+
+(defn can-update-account?
+  "Valida se pode atualizar conta"
+  [account name email]
+  (and (not= (:status account) :closed)
        (valid-email? email)
        (string? name)
        (>= (count name) 2)))

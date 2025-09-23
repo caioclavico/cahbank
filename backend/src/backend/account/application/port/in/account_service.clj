@@ -3,6 +3,9 @@
 (defprotocol AccountService
   (open-account [this document name email]
     "Abre uma nova conta para o cliente")
-
-  (get-account [this account-id]
-    "Obtém uma conta pelo ID"))
+  
+  (update-account [this account-id name email]
+    "Atualiza dados da conta (nome e email)")
+  
+  (close-account [this account-id reason]
+    "Fecha uma conta"))
