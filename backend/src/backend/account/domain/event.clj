@@ -38,3 +38,16 @@
           :reason reason}
    :timestamp (str (java.time.Instant/now))
    :version 1})
+
+(defn account-error-event
+  "Cria evento de erro de conta"
+  [error-type document account-id reason]
+  {:type "account-error"
+   :id (str (java.util.UUID/randomUUID))
+   :data {:error-type error-type
+          :document document
+          :account-id account-id
+          :reason reason
+          :command-data {:document document :account-id account-id}}
+   :timestamp (str (java.time.Instant/now))
+   :version 1})

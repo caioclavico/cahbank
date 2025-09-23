@@ -1,53 +1,51 @@
 (ns backend.shared.cassandra
   (:require [mount.core :refer [defstate]]
             [qbits.alia :as alia]
-            [qbits.hayt :refer [create-keyspace create-table create-index
-                                if-exists if-not-exists column-definitions
-                                with column and on-table]]
             [taoensso.timbre :as log]))
 
-(def cassandra-config
-  {:contact-points ["localhost"]
-   :port 9042
-   :keyspace "digital_bank"})
-
-
-#_(defstate cassandra-session
+#_{:clj-kondo/ignore [:unresolved-symbol]}
+(defstate cassandra-session
     :start (do
              (log/info "🔌 Connecting to Cassandra...")
-             (alia/connect cassandra-config))
+             (let [cluster (alia/cluster {:contact-points ["localhost"]
+                                          :port 9042})
+                   session (alia/connect cluster)]
+               (log/info "🔌 Connected to Cassandra!")
+               
+               ;; Aguardar a conexão estar pronta
+               (Thread/sleep 100)
+               
+               ;; Criar keyspace usando comando SQL direto
+               (alia/execute 
+                session 
+                "CREATE KEYSPACE IF NOT EXISTS digital_bank WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}")
+               (log/info "🗄️ Keyspace 'digital_bank' created!")
+               
+               ;; Usar keyspace
+               (alia/execute session "USE digital_bank")
+               
+               ;; Criar tabela usando comando SQL direto
+               (alia/execute 
+                session 
+                "CREATE TABLE IF NOT EXISTS accounts (
+                   id text PRIMARY KEY,
+                   document text,
+                   name text,
+                   email text,
+                   balance_amount decimal,
+                   balance_currency text,
+                   status text,
+                   created_at timestamp
+                 ) WITH compaction = {'class': 'LeveledCompactionStrategy'}")
+               (log/info "📋 Table 'accounts' created!")
+               
+               ;; Criar índice
+               (alia/execute
+                session
+                "CREATE INDEX IF NOT EXISTS accounts_by_document ON accounts (document)")
+               (log/info "🔍 Index 'accounts_by_document' created!")
+               
+               session))
     :stop (fn [session]
-            (log/info "🔌 Closing Cassandra connection...")
+            (log/info " Closing Cassandra connection...")
             (alia/shutdown session)))
-
-#_(defn init-keyspace []
-    #_{:clj-kondo/ignore [:unresolved-symbol]}
-    (alia/execute
-     cassandra-session
-     (create-keyspace :digital_bank
-                      (if-exists false)
-                      (with {:replication {:class "SimpleStrategy"
-                                           :replication_factor 1}}))))
-
-#_(defn init-tables []
-    (alia/execute
-     cassandra-session
-     (create-table :accounts
-                   (if-not-exists true)
-                   (column-definitions {:id :text
-                                        :document :text
-                                        :name :text
-                                        :email :text
-                                        :balance_amount :decimal
-                                        :balance_currency :text
-                                        :status :text
-                                        :created_at :timestamp
-                                        :primary-key [:id]})
-                   (with {:compaction {:class "LeveledCompactionStrategy"}})))
-
-    (alia/execute
-     cassandra-session
-     (create-index :accounts_by_document
-                   (if-not-exists true)
-                   (on-table :accounts)
-                   (and (column :document)))))
