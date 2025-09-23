@@ -6,8 +6,7 @@
   account-repo/AccountRepository
 
   (save-account [_this account]
-    (try
-      (alia/execute
+    (alia/execute
        session
        (str "INSERT INTO accounts (id, document, name, email, balance_amount, balance_currency, status, created_at) "
             "VALUES ('" (:id account) "', '"
@@ -17,11 +16,7 @@
             (:amount (:balance account)) ", '"
             (:currency (:balance account)) "', '"
             (name (:status account)) "', '"
-            (:created-at account) "')"))
-      account
-      (catch Exception e
-        (throw (ex-info "Erro ao salvar conta no Cassandra" 
-                        {:account-id (:id account) :error (.getMessage e)})))))
+            (:created-at account) "')")))
 
   (exists-by-document? [_this document]
     (boolean
