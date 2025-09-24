@@ -29,28 +29,32 @@
 (defn valid-document?
   "Valida CPF (11 dígitos)"
   [document]
-  (and (string? document)
-       (= (count document) 11)
-       (every? #(Character/isDigit %) document)))
+  (boolean
+    (and (string? document)
+         (= (count document) 11)
+         (every? #(Character/isDigit %) document))))
 
 (defn valid-email?
   "Valida email básico"
   [email]
-  (and (string? email)
-       (re-matches #".+@.+\..+" email)))
+  (boolean
+    (and (string? email)
+         (re-matches #".+@.+\..+" email))))
 
 (defn can-open-account?
   "Valida dados para abrir conta"
   [document name email]
-  (and (valid-document? document)
-       (valid-email? email)
-       (string? name)
-       (>= (count name) 2)))
+  (boolean
+    (and (valid-document? document)
+         (valid-email? email)
+         (string? name)
+         (>= (count name) 2))))
 
 (defn can-update-account?
   "Valida se pode atualizar conta"
   [account name email]
-  (and (not= (:status account) :closed)
-       (valid-email? email)
-       (string? name)
-       (>= (count name) 2)))
+  (boolean
+    (and (not= (:status account) :closed)
+         (valid-email? email)
+         (string? name)
+         (>= (count name) 2))))
