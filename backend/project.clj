@@ -11,7 +11,12 @@
                  [cc.qbits/alia-all "4.3.7-beta1"]
                  [cc.qbits/hayt "4.1.0"]
                  [cheshire "6.1.0"]
-                 [mount "0.1.16"]]
+                 [mount "0.1.16"]
+                 [compojure "1.7.0"]
+                 [ring/ring-core "1.9.5"]
+                 [ring/ring-jetty-adapter "1.9.5"]
+                 [ring/ring-json "0.5.1"]
+                 [ring-cors "0.1.13"]]
   :main ^:skip-aot backend.core
   :target-path "target/%s"
   :profiles {:dev {:dependencies [[midje "1.10.9"]]       ; Testes
