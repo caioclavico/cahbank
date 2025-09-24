@@ -45,6 +45,11 @@
                 "CREATE INDEX IF NOT EXISTS accounts_by_document ON accounts (document)")
                (log/info "🔍 Index 'accounts_by_document' created!")
                
+               ;; transaction tables
+               (alia/execute session "CREATE TABLE IF NOT EXISTS transactions (id text PRIMARY KEY, from_account_id text, to_account_id text, amount decimal, type text, status text, description text, timestamp timestamp) WITH compaction = {'class': 'LeveledCompactionStrategy'}")
+               (alia/execute session "CREATE INDEX IF NOT EXISTS transactions_by_from_account ON transactions (from_account_id)")
+               (alia/execute session "CREATE INDEX IF NOT EXISTS transactions_by_to_account ON transactions (to_account_id)")
+               
                session))
     :stop (fn [session]
             (log/info " Closing Cassandra connection...")

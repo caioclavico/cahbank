@@ -135,7 +135,7 @@
                      :details (.getMessage e)})
           (status 500)))))
 
-(defn health-handler [request]
+(defn health-handler [_request]
   (response {:service "account-service"
              :status "healthy"
              :version "1.0.0"
