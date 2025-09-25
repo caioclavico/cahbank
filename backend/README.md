@@ -1,44 +1,68 @@
-# backend
+Arquitetura do CahBank
 
-FIXME: description
+## 🏗️ Visão Geral da Arquitetura
 
-## Installation
+O CahBank foi projetado seguindo os princípios da **Arquitetura Hexagonal** (Ports & Adapters), garantindo alta testabilidade, manutenibilidade e flexibilidade.
 
-Download from https://example.com/FIXME.
+## Princípios Arquiteturais
 
-## Usage
+### **1. Arquitetura Hexagonal**
 
-FIXME: explanation
+- **Core**: Lógica de negócio isolada
+- **Ports**: Interfaces que definem contratos
+- **Adapters**: Implementações específicas de infraestrutura
 
-    $ java -jar backend-0.1.0-standalone.jar [args]
+### **2. Event-Driven Architecture**
 
-## Options
+- **Comandos**: Ações que modificam o estado
+- **Eventos**: Notificações de mudanças de estado
+- **Assíncrono**: Processamento não-bloqueante
 
-FIXME: listing of options this app accepts.
+### **3. CQRS (Command Query Responsibility Segregation)**
 
-## Examples
+- **Commands**: Modificam o estado do sistema
+- **Queries**: Consultam o estado atual
+- **Separação**: Responsabilidades distintas
 
-...
+## 🏢 Estrutura de Camadas
 
-### Bugs
+### **Domain Layer**
 
-...
+```
+domain/
+├── model/          # Entidades e Value Objects
+├── event/          # Eventos de domínio
+└── service/        # Serviços de domínio
+```
 
-### Any Other Sections
-### That You Think
-### Might be Useful
+### **Application Layer**
 
-## License
+```
+application/
+├── port/
+│   ├── in/         # Driving Ports (Interfaces de entrada)
+│   └── out/        # Driven Ports (Interfaces de saída)
+└── service/        # Serviços de aplicação
+```
 
-Copyright © 2025 FIXME
+### **Infrastructure Layer**
 
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-https://www.eclipse.org/legal/epl-2.0.
+```
+infrastructure/
+├── persistence/    # Repositórios e banco de dados
+├── messaging/      # Kafka producers e consumers
+└── web/            # APIs REST
+```
 
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+# 🔌 Ports & Adapters
+
+### **Driving Ports (Inbound)**
+
+- **AccountService**: Interface para operações de conta
+- **TransactionService**: Interface para operações de transação
+
+### **Driven Ports (Outbound)**
+
+- **AccountRepository**: Interface para persistência de contas
+- **TransactionRepository**: Interface para persistência de transações
+- **EventPublisher**: Interface para publicação de eventos

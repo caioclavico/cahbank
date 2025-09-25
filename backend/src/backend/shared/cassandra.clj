@@ -15,7 +15,7 @@
                ;; Aguardar a conexão estar pronta
                (Thread/sleep 100)
                
-               ;; Criar keyspace usando comando SQL direto
+               ;; Criar keyspace
                (alia/execute 
                 session 
                 "CREATE KEYSPACE IF NOT EXISTS digital_bank WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1}")
@@ -24,7 +24,7 @@
                ;; Usar keyspace
                (alia/execute session "USE digital_bank")
                
-               ;; Criar tabela usando comando SQL direto
+               ;; Criar tabela accounts
                (alia/execute 
                 session 
                 "CREATE TABLE IF NOT EXISTS accounts (
@@ -39,13 +39,13 @@
                  ) WITH compaction = {'class': 'LeveledCompactionStrategy'}")
                (log/info "📋 Table 'accounts' created!")
                
-               ;; Criar índice
+               ;; Criar índice accounts_by_document
                (alia/execute
                 session
                 "CREATE INDEX IF NOT EXISTS accounts_by_document ON accounts (document)")
                (log/info "🔍 Index 'accounts_by_document' created!")
                
-               ;; transaction tables
+               ;; Criar tabela transactions
                (alia/execute session "CREATE TABLE IF NOT EXISTS transactions (id text PRIMARY KEY, from_account_id text, to_account_id text, amount decimal, type text, status text, description text, timestamp timestamp) WITH compaction = {'class': 'LeveledCompactionStrategy'}")
                (alia/execute session "CREATE INDEX IF NOT EXISTS transactions_by_from_account ON transactions (from_account_id)")
                (alia/execute session "CREATE INDEX IF NOT EXISTS transactions_by_to_account ON transactions (to_account_id)")
