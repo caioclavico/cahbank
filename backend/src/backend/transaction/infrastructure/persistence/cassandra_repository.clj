@@ -8,7 +8,7 @@
 
   (save-transaction [_this transaction]
     (try
-      (log/info "💾 Salvando transação no Cassandra - ID:" (:id transaction))
+      (log/info "💾 Saving transaction to Cassandra - ID:" (:id transaction))
       (alia/execute
         session
         (str "INSERT INTO transactions (id, from_account_id, to_account_id, amount, type, status, description, timestamp) "
@@ -28,14 +28,34 @@
                         {:transaction-id (:id transaction) :error (.getMessage e)})))))
 
   (find-by-account [_this account-id]
-    (log/info "�� Buscando transações da conta:" account-id)
-    (alia/execute
-      session
-      "SELECT * FROM transactions WHERE from_account_id = ? OR to_account_id = ? ORDER BY timestamp DESC"
-      {:values [account-id account-id]}))
+    (log/info "🔍 Fetching transactions for account:" account-id)
+    (try
+      ;; Cassandra doesn't support OR natively, so we do two queries
+      (let [from-transactions (alia/execute
+                                session
+                                "SELECT * FROM transactions WHERE from_account_id = ? ALLOW FILTERING"
+                                {:values [account-id]})
+            to-transactions (alia/execute
+                              session
+                              "SELECT * FROM transactions WHERE to_account_id = ? ALLOW FILTERING"
+                              {:values [account-id]})
+            all-transactions (concat from-transactions to-transactions)
+            ;; Remove duplicates by ID using a set
+            seen-ids (atom #{})
+            unique-transactions (filter (fn [tx]
+                                          (let [id (:id tx)]
+                                            (if (contains? @seen-ids id)
+                                              false
+                                              (do (swap! seen-ids conj id)
+                                                  true))))
+                                        all-transactions)]
+        unique-transactions)
+      (catch Exception e
+        (log/error "❌ Error fetching transactions:" (.getMessage e))
+        [])))
 
   (find-by-id [_this transaction-id]
-    (log/info "�� Buscando transação por ID:" transaction-id)
+    (log/info "🔍 Fetching transaction by ID:" transaction-id)
     (first
       (alia/execute
         session

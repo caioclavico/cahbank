@@ -1,0 +1,37 @@
+# Build artifacts
+target/
+.lein-*
+.nrepl-port
+.cpcache/
+
+# Logs
+logs/
+*.log
+nohup.out
+
+# PIDs
+*.pid
+.backend.pid
+.gateway.pid
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+*.md
+!README.md
+
+# Scripts
+*.sh
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore

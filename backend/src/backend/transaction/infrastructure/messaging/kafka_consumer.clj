@@ -24,24 +24,24 @@
     (let [command (json/parse-string (:value message) true)
           command-type (:type command)]
       (log/info "📨 Comando:" command-type "| Offset:" (:offset message))
-      (case command-type
+            (case command-type
         "transfer" 
         (let [{:keys [from-account-id to-account-id amount description]} (:data command)
-              transaction-service-instance (let [repository (cassandra-repo/create-transaction-repository @cassandra-shared/cassandra-session)
+              transaction-service-instance (let [repository (cassandra-repo/create-transaction-repository cassandra-shared/cassandra-session)
                                                  event-publisher (event-pub/create-event-publisher)]
                                            (app-service/create-transaction-service repository event-publisher))]
           (transaction-service/transfer transaction-service-instance from-account-id to-account-id amount description))
         
         "deposit"
         (let [{:keys [account-id amount description]} (:data command)
-              transaction-service-instance (let [repository (cassandra-repo/create-transaction-repository @cassandra-shared/cassandra-session)
+              transaction-service-instance (let [repository (cassandra-repo/create-transaction-repository cassandra-shared/cassandra-session)
                                                  event-publisher (event-pub/create-event-publisher)]
                                            (app-service/create-transaction-service repository event-publisher))]
           (transaction-service/deposit transaction-service-instance account-id amount description))
         
         "withdrawal"
         (let [{:keys [account-id amount description]} (:data command)
-              transaction-service-instance (let [repository (cassandra-repo/create-transaction-repository @cassandra-shared/cassandra-session)
+              transaction-service-instance (let [repository (cassandra-repo/create-transaction-repository cassandra-shared/cassandra-session)
                                                  event-publisher (event-pub/create-event-publisher)]
                                            (app-service/create-transaction-service repository event-publisher))]
           (transaction-service/withdraw transaction-service-instance account-id amount description))
@@ -55,13 +55,13 @@
 (defstate kafka-consumer
   :start
   (let [consumer (kafka/create CONSUMER_CONFIG)]
-    (log/info "🚀 Iniciando consumer de transaction-cmds...")
+    (log/info "🚀 Starting transaction-cmds consumer...")
     (println (kafka-core/health-check))
     (kafka/subscribe! consumer [TRANSACTION_COMMANDS_TOPIC])
-    (kafka/consume! consumer {:poll-timeout 1000
-                              :handler handle-transaction-cmd})
+    (future (kafka/consume! consumer {:poll-timeout 1000
+                                      :handler handle-transaction-cmd}))
     consumer)
   :stop
   (do
-    (log/info "🛑 Parando consumer de transaction-cmds...")
+    (log/info "🛑 Stopping transaction-cmds consumer...")
     (kafka/close! kafka-consumer)))

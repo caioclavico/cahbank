@@ -11,12 +11,12 @@
   
   (transfer [_this from-account-id to-account-id amount description]
     (try
-      (log/info "💸 Processando transferência de" from-account-id "para" to-account-id "valor:" amount)
+      (log/info "💸 Processing transfer from" from-account-id "to" to-account-id "amount:" amount)
       
       (if-not (model/can-transfer? from-account-id to-account-id amount)
         (do
-          (log/error "❌ Dados inválidos para transferência")
-          (throw (ex-info "Dados inválidos para transferência"
+          (log/error "❌ Invalid data for transfer")
+          (throw (ex-info "Invalid data for transfer"
                           {:type :validation-error})))
         
         (let [transfer (model/create-transfer from-account-id to-account-id amount description)
@@ -31,20 +31,20 @@
           
           (transaction-repo/save-transaction repository transaction)
           (event-pub/publish-event event-publisher (event/transaction-created-event transaction))
-          (log/info "✅ Transferência criada com sucesso - ID:" (:id transaction))
+          (log/info "✅ Transfer created successfully - ID:" (:id transaction))
           transaction))
       (catch Exception e
-        (log/error "❌ Erro na transferência:" (.getMessage e))
+        (log/error "❌ Error in transfer:" (.getMessage e))
         (throw e))))
   
   (deposit [_this account-id amount description]
     (try
-      (log/info "💰 Processando depósito na conta" account-id "valor:" amount)
+      (log/info "💰 Processing deposit to account" account-id "amount:" amount)
       
       (if-not (model/can-deposit? account-id amount)
         (do
-          (log/error "❌ Dados inválidos para depósito")
-          (throw (ex-info "Dados inválidos para depósito"
+          (log/error "❌ Invalid data for deposit")
+          (throw (ex-info "Invalid data for deposit"
                           {:type :validation-error})))
         
         (let [deposit (model/create-deposit account-id amount description)
@@ -59,20 +59,20 @@
           
           (transaction-repo/save-transaction repository transaction)
           (event-pub/publish-event event-publisher (event/transaction-created-event transaction))
-          (log/info "✅ Depósito criado com sucesso - ID:" (:id transaction))
+          (log/info "✅ Deposit created successfully - ID:" (:id transaction))
           transaction))
       (catch Exception e
-        (log/error "❌ Erro no depósito:" (.getMessage e))
+        (log/error "❌ Error in deposit:" (.getMessage e))
         (throw e))))
   
   (withdraw [_this account-id amount description]
     (try
-      (log/info "💸 Processando saque da conta" account-id "valor:" amount)
+      (log/info "💸 Processing withdrawal from account" account-id "amount:" amount)
       
       (if-not (model/can-withdraw? account-id amount)
         (do
-          (log/error "❌ Dados inválidos para saque")
-          (throw (ex-info "Dados inválidos para saque"
+          (log/error "❌ Invalid data for withdrawal")
+          (throw (ex-info "Invalid data for withdrawal"
                           {:type :validation-error})))
         
         (let [withdrawal (model/create-withdrawal account-id amount description)
@@ -87,14 +87,14 @@
           
           (transaction-repo/save-transaction repository transaction)
           (event-pub/publish-event event-publisher (event/transaction-created-event transaction))
-          (log/info "✅ Saque criado com sucesso - ID:" (:id transaction))
+          (log/info "✅ Withdrawal created successfully - ID:" (:id transaction))
           transaction))
       (catch Exception e
-        (log/error "❌ Erro no saque:" (.getMessage e))
+        (log/error "❌ Error in withdrawal:" (.getMessage e))
         (throw e))))
   
   (get-transactions [_this account-id]
-    (log/info "📋 Buscando transações da conta:" account-id)
+    (log/info "📋 Fetching transactions for account:" account-id)
     (transaction-repo/find-by-account repository account-id)))
 
 (defn create-transaction-service

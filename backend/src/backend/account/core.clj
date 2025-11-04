@@ -1,7 +1,7 @@
 (ns backend.account.core
   (:require [mount.core :as mount]
-            [backend.account.infrastructure.messaging.kafka-consumer :refer [kafka-consumer]]
-            [backend.shared.cassandra :refer [cassandra-session]]
+            [backend.account.infrastructure.messaging.kafka-consumer]
+            [backend.shared.cassandra]
             [backend.account.infrastructure.web.account-api :refer [account-api]]
             [ring.adapter.jetty :refer [run-jetty]]
             [taoensso.timbre :as log]
@@ -14,13 +14,13 @@
 
 (defn start-account-service []
   (configure-logging)
-  (log/info "🚀 Iniciando Account Service...")
+  (log/info "🚀 Starting Account Service...")
   (run-jetty account-api {:port 8081 :join? false})
-  (log/info "🌐 Account Service API disponível em: http://localhost:8081")
-  (mount/start))
+  (log/info "🌐 Account Service API available at: http://localhost:8081")
+  (future (mount/start)))
 
 (defn stop-account-service []
-  (log/info " Parando Account Service...")
+  (log/info "🛑 Stopping Account Service...")
   (mount/stop))
 
 (defn -main [& _args]

@@ -15,26 +15,26 @@
   (try
     (let [body (:body request)
           {:keys [document name email]} body]
-      (log/info " Account Service: Criando conta para" name "| Documento:" document)
+      (log/info "📝 Account Service: Creating account for" name "| Document:" document)
       
-      ;; Validação básica
+      ;; Basic validation
       (if (and document name email)
         (do
-          ;; Publica comando no Kafka
+          ;; Publish command to Kafka
           (cmd-pub/publish-create-account-command document name email)
           (-> (response {:service "account-service"
-                         :message "Conta sendo criada"
+                         :message "Account being created"
                          :status "processing"
                          :document document
                          :timestamp (str (java.time.Instant/now))})
               (status 202)))
-        (-> (response {:error "Dados inválidos"
+        (-> (response {:error "Invalid data"
                        :required ["document" "name" "email"]
                        :received {:document document :name name :email email}})
             (status 400))))
     (catch Exception e
       (log/error "❌ Account Service Error:" (.getMessage e))
-      (-> (response {:error "Erro interno do servidor"
+      (-> (response {:error "Internal server error"
                      :details (.getMessage e)})
           (status 500)))))
 
@@ -43,24 +43,24 @@
     (let [account-id (get-in request [:params :id])
           body (:body request)
           {:keys [name email]} body]
-      (log/info " Account Service: Atualizando conta" account-id)
+      (log/info "📝 Account Service: Updating account" account-id)
       
       (if (and account-id name email)
         (do
           (cmd-pub/publish-update-account-command account-id name email)
           (-> (response {:service "account-service"
-                         :message "Conta sendo atualizada"
+                         :message "Account being updated"
                          :status "processing"
                          :account-id account-id
                          :timestamp (str (java.time.Instant/now))})
               (status 202)))
-        (-> (response {:error "Dados inválidos"
+        (-> (response {:error "Invalid data"
                        :required ["name" "email"]
                        :received {:account-id account-id :name name :email email}})
             (status 400))))
     (catch Exception e
       (log/error "❌ Account Service Error:" (.getMessage e))
-      (-> (response {:error "Erro interno do servidor"
+      (-> (response {:error "Internal server error"
                      :details (.getMessage e)})
           (status 500)))))
 
@@ -69,23 +69,23 @@
     (let [account-id (get-in request [:params :id])
           body (:body request)
           {:keys [reason]} body]
-      (log/info " Account Service: Fechando conta" account-id "| Motivo:" reason)
+      (log/info "🔒 Account Service: Closing account" account-id "| Reason:" reason)
       
       (if account-id
         (do
-          (cmd-pub/publish-close-account-command account-id (or reason "Solicitação via API"))
+          (cmd-pub/publish-close-account-command account-id (or reason "Request via API"))
           (-> (response {:service "account-service"
-                         :message "Conta sendo fechada"
+                         :message "Account being closed"
                          :status "processing"
                          :account-id account-id
-                         :reason (or reason "Solicitação via API")
+                         :reason (or reason "Request via API")
                          :timestamp (str (java.time.Instant/now))})
               (status 202)))
-        (-> (response {:error "ID da conta é obrigatório"})
+        (-> (response {:error "Account ID is required"})
             (status 400))))
     (catch Exception e
       (log/error "❌ Account Service Error:" (.getMessage e))
-      (-> (response {:error "Erro interno do servidor"
+      (-> (response {:error "Internal server error"
                      :details (.getMessage e)})
           (status 500)))))
 
@@ -93,7 +93,7 @@
   (try
     (let [account-id (get-in request [:params :id])
           repository (cassandra-repo/create-account-repository cassandra-shared/cassandra-session)]
-      (log/info " Account Service: Consultando conta" account-id)
+      (log/info "🔍 Account Service: Querying account" account-id)
       
       (if account-id
         (if-let [account (account-repo/find-by-id repository account-id)]

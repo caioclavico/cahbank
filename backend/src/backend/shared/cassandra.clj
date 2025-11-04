@@ -7,10 +7,12 @@
 (defstate cassandra-session
     :start (do
              (log/info "🔌 Connecting to Cassandra...")
-             (let [cluster (alia/cluster {:contact-points ["localhost"]
-                                          :port 9042})
+             (let [contact-points (or (System/getenv "CASSANDRA_CONTACT_POINTS") "localhost")
+                   port (or (some-> (System/getenv "CASSANDRA_PORT") Integer/parseInt) 9042)
+                   cluster (alia/cluster {:contact-points [contact-points]
+                                          :port port})
                    session (alia/connect cluster)]
-               (log/info "🔌 Connected to Cassandra!")
+               (log/info "🔌 Connected to Cassandra!" contact-points ":" port)
                
                ;; Aguardar a conexão estar pronta
                (Thread/sleep 100)
@@ -52,5 +54,5 @@
                
                session))
     :stop (fn [session]
-            (log/info " Closing Cassandra connection...")
+            (log/info "🛑 Closing Cassandra connection...")
             (alia/shutdown session)))

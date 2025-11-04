@@ -1,7 +1,7 @@
 (ns backend.transaction.core
   (:require [mount.core :as mount]
-            [backend.transaction.infrastructure.messaging.kafka-consumer :refer [kafka-consumer]]
-            [backend.shared.cassandra :refer [cassandra-session]]
+            [backend.transaction.infrastructure.messaging.kafka-consumer]
+            [backend.shared.cassandra]
             [backend.transaction.infrastructure.web.transaction-api :refer [transaction-api]]
             [ring.adapter.jetty :refer [run-jetty]]
             [taoensso.timbre :as log]
@@ -19,16 +19,13 @@
 (defn start-transaction-service []
   (configure-logging)
   (let [port (get-port)]
-    (log/info "🚀 Iniciando Transaction Service...")
-    (mount/start)
-    (log/info "🌐 Transaction Service API disponível em: http://localhost:" port)
+    (log/info "🚀 Starting Transaction Service...")
     (run-jetty transaction-api {:port port :join? false})
-    (Thread/sleep 1000)
-    (log/info "✅ Servidor iniciado com sucesso na porta" port)
-    (while true (Thread/sleep 1000))))
+    (log/info "🌐 Transaction Service API available at: http://localhost:" port)
+    (future (mount/start))))
 
 (defn stop-transaction-service []
-  (log/info "🛑 Parando Transaction Service...")
+  (log/info "🛑 Stopping Transaction Service...")
   (mount/stop))
 
 (defn -main [& _args]
