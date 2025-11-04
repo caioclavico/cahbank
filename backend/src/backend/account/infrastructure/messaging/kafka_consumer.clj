@@ -15,6 +15,7 @@
 
 (def CONSUMER_CONFIG (kafka-config/consumer-config "account-cmds-group"))
 
+#_{:clj-kondo/ignore [:unresolved-var]}
 (defn handle-account-cmd [message]
   (try
     (let [command (json/parse-string (:value message) true)

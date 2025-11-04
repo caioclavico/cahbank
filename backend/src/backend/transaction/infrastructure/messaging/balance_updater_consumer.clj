@@ -39,6 +39,7 @@
     (catch Exception e
       (log/error "❌ Error updating balance:" (.getMessage e)))))
 
+#_{:clj-kondo/ignore [:unresolved-var]}
 (defn handle-transaction-event [message]
   (try
     (let [event (json/parse-string (:value message) true)

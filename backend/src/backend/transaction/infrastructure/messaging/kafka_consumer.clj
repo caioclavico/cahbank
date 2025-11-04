@@ -19,6 +19,7 @@
    :value-deserializer "org.apache.kafka.common.serialization.StringDeserializer"
    :auto-offset-reset "earliest"})
 
+#_{:clj-kondo/ignore [:unresolved-var]}
 (defn handle-transaction-cmd [message]
   (try
     (let [command (json/parse-string (:value message) true)

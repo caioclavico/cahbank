@@ -1,5 +1,5 @@
 (ns api-gateway.core-test
-  (:require [clojure.test :refer :all]
+  (:require [clojure.test :refer [deftest is testing]]
             [api-gateway.gateway.router :as router]
             [api-gateway.middleware.rate-limit :as rate-limit]
             [api-gateway.config :as config]))
